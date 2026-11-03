@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Menu, X } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 
 export function MobileNavigation({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -37,17 +37,43 @@ export function MobileNavigation({ children }: { children: ReactNode }) {
   );
 }
 
-export function Reveal({ children, delay = 0, hero = false, className }: { children: ReactNode; delay?: number; hero?: boolean; className?: string }) {
+export function Reveal({ children, delay = 0, stagger = 0, hero = false, className }: { children: ReactNode; delay?: number; stagger?: number; hero?: boolean; className?: string }) {
   const reduced = useReducedMotion();
-  const entrance = { opacity: 1, y: 0, transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] as const } };
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  const [waiting, setWaiting] = useState(false);
+
+  // The server HTML stays visible. Once JavaScript runs, only content still below the fold is hidden, before paint.
+  useLayoutEffect(() => {
+    if (!hero && ref.current && ref.current.getBoundingClientRect().top >= window.innerHeight) setWaiting(true);
+  }, [hero]);
+
+  if (hero) {
+    return (
+      <motion.div
+        className={className}
+        initial={false}
+        {...(!reduced && { animate: { opacity: [0.82, 1], y: [9, 0], transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] as const } } })}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  // Cards stack at this width, so each one reveals on its own as it enters the viewport.
+  const stacked = typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches;
+  const hidden = waiting && !inView && !reduced;
+
   return (
     <motion.div
+      ref={ref}
+      data-reveal
       className={className}
       initial={false}
-      {...(!reduced && (hero ? { animate: { opacity: [0.82, 1], y: [9, 0], transition: entrance.transition } } : {
-        whileInView: { ...entrance, opacity: [0.82, 1], y: [9, 0] },
-        viewport: { once: true, amount: 0.25 },
-      }))}
+      animate={hidden
+        ? { opacity: 0, y: 8, transition: { duration: 0 } }
+        : { opacity: 1, y: 0, transition: reduced ? { duration: 0 } : { duration: 0.45, delay: delay + (stacked ? 0 : stagger), ease: [0.22, 1, 0.36, 1] as const } }}
+      onFocusCapture={() => setWaiting(false)}
     >
       {children}
     </motion.div>

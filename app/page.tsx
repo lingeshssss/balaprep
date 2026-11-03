@@ -63,7 +63,7 @@ export default function Home() {
             <h2 id="about-title">Preparation<br />with purpose.</h2>
             <p className="section-copy">At BalaPrep, we believe meaningful progress starts with the right guidance. Our approach emphasizes personalized support, strong fundamentals, and the confidence to take on new challenges.</p>
           </Reveal>
-          <Reveal delay={0.07} className="visual-wrap">
+          <Reveal delay={0.08} className="visual-wrap">
             <div className="visual" aria-hidden="true">
               <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid slice" fill="none">
                 <defs>
@@ -90,7 +90,7 @@ export default function Home() {
           <ol className="cards">
             {approach.map(({ title, description, icon: Icon }, index) => (
               <li key={title}>
-                <Reveal delay={index * 0.07} className="card">
+                <Reveal stagger={(index + 1) * 0.07} className="card">
                   <div className="card-top"><span className="card-icon"><Icon size={20} strokeWidth={1.6} aria-hidden /></span><span className="card-number" aria-hidden="true">0{index + 1}</span></div>
                   <h3>{title}</h3><p>{description}</p>
                 </Reveal>

@@ -100,3 +100,6 @@ h2 { font-size: clamp(2.25rem, 5.6vw, 4rem); line-height: 1.02; font-weight: 610
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .card:hover, .button:hover { translate: none; transform: none; }
 }
+@media print {
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+}
